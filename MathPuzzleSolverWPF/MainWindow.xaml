@@ -1,0 +1,47 @@
+﻿<Window x:Class="MathPuzzleSolverWPF.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:MathPuzzleSolverWPF"
+        mc:Ignorable="d"
+        Title="MainWindow"
+        Height="450"
+        Width="800">
+   <Grid>
+      <Grid.RowDefinitions>
+         <RowDefinition Height="Auto" />
+         <RowDefinition Height="*" />
+      </Grid.RowDefinitions>
+      <Grid.ColumnDefinitions>
+         <ColumnDefinition Width="*" />
+         <ColumnDefinition Width="*" />
+      </Grid.ColumnDefinitions>
+
+      <StackPanel Orientation="Horizontal"
+                  Grid.ColumnSpan="2">
+         <Label Content="Digits:" />
+         <TextBox Width="50"
+                  Text="{Binding Digits, Mode=TwoWay}"/>
+         <Label Content="Start:" />
+         <TextBox Width="50"
+                  Text="{Binding Start}" />
+         <Label Content="End:" />
+         <TextBox Width="50"
+                  Text="{Binding End}" />
+         <Button Content="Compute"
+                 Command="{Binding ComputeCommand, Mode=OneTime}"/>
+      </StackPanel>
+      <ScrollViewer Grid.Row="1"
+                    Grid.ColumnSpan="2">
+         <ItemsControl ItemsSource="{Binding Answers}"
+                       BorderThickness="0">
+            <ItemsControl.ItemTemplate>
+               <DataTemplate>
+                  <local:AnswerUserControl />
+               </DataTemplate>
+            </ItemsControl.ItemTemplate>
+         </ItemsControl>
+      </ScrollViewer>
+   </Grid>
+</Window>
