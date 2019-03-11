@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -28,6 +29,11 @@ namespace MathPuzzleSolverWPF
          var vm = new MainWindowVM( controller );
          controller.VM = vm;
          this.DataContext = vm;
+
+         this.Closing += delegate ( object sender, CancelEventArgs e )
+         {
+            controller.CancelAnyComputations();
+         };
       }
    }
 }

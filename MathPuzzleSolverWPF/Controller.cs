@@ -103,7 +103,7 @@ namespace MathPuzzleSolverWPF
 
       private void InvokeOnMainThread( Action action )
       {
-         Application.Current?.Dispatcher.Invoke( action );
+         Application.Current?.Dispatcher.BeginInvoke( action );
       }
 
       private void ComputeNumbers()
@@ -118,10 +118,10 @@ namespace MathPuzzleSolverWPF
             var answer = _answers.FirstOrDefault( an => an.Number == e.Value );
             if ( answer is null )
                return;
-            answer.Equations.Add( e.Equation );
 
             InvokeOnMainThread( () =>
             {
+               answer.Equations.Add( e.Equation );
                answer.UpdateVM();
             } );
          };
