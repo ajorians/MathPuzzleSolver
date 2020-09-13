@@ -16,14 +16,16 @@ namespace MathPuzzleSolverWPF
       {
          _controller = controller;
 
-         //_digits = GetDigitsString( _controller.GetDigits() );
-         //_start = _controller.GetStart();
-         //_end = _controller.GetEnd();
-
          _controller.AnswerItemsChanged += AnswerItemsChanged;
          _controller.StartChanged += StartChanged;
          _controller.EndChanged += EndChanged;
          _controller.DigitsChanged += DigitsChanged;
+         _controller.ComputationStatusChanged += ComputationStatusChanged;
+      }
+
+      private void ComputationStatusChanged(object sender, EventArgs e)
+      {
+         OnPropertyChanged(nameof(ComputationInProgress));
       }
 
       private static string GetDigitsString(int[] digits)
@@ -51,26 +53,10 @@ namespace MathPuzzleSolverWPF
       {
          _answers.Clear();
 
-         //for( int i=_controller.GetStart(); i<= _controller.GetEnd(); i++)
          foreach( var answer in _controller.Answers )
          {
             _answers.Add(new AnswerVM(answer));
          }
-
-         //List<AnswerVM> answersToRemove = new List<AnswerVM>();
-         //foreach( var answer in _answers )
-         //{
-         //   if( answer.Number < _controller.GetStart() || answer.Number > _controller.GetEnd() )
-         //   {
-         //      answersToRemove.Add(answer);
-         //   }
-         //}
-         //answersToRemove.ForEach(ans => _answers.Remove(ans));
-
-         //foreach (var answer in _answers)
-         //{
-
-         //}
       }
 
       private void OnPropertyChanged( string propertyName )
@@ -93,7 +79,6 @@ namespace MathPuzzleSolverWPF
                OnPropertyChanged( nameof( Digits ) );
 
                _controller.SetDigits( _digits );
-               OnPropertyChanged(nameof(ComputationInProgress));
             }
          }
       }
@@ -113,7 +98,6 @@ namespace MathPuzzleSolverWPF
                OnPropertyChanged( nameof( Start ) );
 
                _controller.SetStart( _start );
-               OnPropertyChanged(nameof(ComputationInProgress));
             }
          }
       }
@@ -132,7 +116,6 @@ namespace MathPuzzleSolverWPF
                OnPropertyChanged( nameof( End ) );
 
                _controller.SetEnd( _end );
-               OnPropertyChanged(nameof(ComputationInProgress));
             }
          }
       }
@@ -149,7 +132,6 @@ namespace MathPuzzleSolverWPF
       private void Compute()
       {
          _controller.StartComputing();
-         OnPropertyChanged(nameof(ComputationInProgress));
       }
 
       private ICommand _computeCommand;
@@ -158,7 +140,6 @@ namespace MathPuzzleSolverWPF
       private void StopComputing()
       {
          _controller.StopComputing();
-         OnPropertyChanged(nameof(ComputationInProgress));
       }
 
       private ICommand _stopComputingCommand;

@@ -32,6 +32,7 @@ namespace MathPuzzleSolverWPF
       public event EventHandler<int> StartChanged;
       public event EventHandler<int> EndChanged;
       public event EventHandler<int[]> DigitsChanged;
+      public event EventHandler ComputationStatusChanged;
 
       public Controller()
       {
@@ -109,6 +110,10 @@ namespace MathPuzzleSolverWPF
 
             InvokeOnMainThread(() => answer.AddEquation(e.Equation));
          };
+         _puzzleSolver.FinishedComputing += delegate (object sender, EventArgs e)
+         {
+            CancelAnyComputations();
+         };
          _puzzleSolver.Solve();
       }
 
@@ -119,6 +124,7 @@ namespace MathPuzzleSolverWPF
             _puzzleSolver.Cancel();
             _computeThread.Join();
             _computeThread = null;
+            ComputationStatusChanged?.Invoke(this, EventArgs.Empty);
          }
       }
 
@@ -130,6 +136,8 @@ namespace MathPuzzleSolverWPF
 
          _computeThread = new Thread( ComputeNumbers );
          _computeThread.Start();
+
+         ComputationStatusChanged?.Invoke(this, EventArgs.Empty);
       }
 
       public void StopComputing()
