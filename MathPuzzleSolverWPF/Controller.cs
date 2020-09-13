@@ -33,6 +33,7 @@ namespace MathPuzzleSolverWPF
       public event EventHandler<int> EndChanged;
       public event EventHandler<int[]> DigitsChanged;
       public event EventHandler ComputationStatusChanged;
+      public event EventHandler<int> NumberEquationComputed;
 
       public Controller()
       {
@@ -88,6 +89,8 @@ namespace MathPuzzleSolverWPF
          }
 
          AnswerItemsChanged?.Invoke(this, EventArgs.Empty);
+
+         NumberEquationComputed?.Invoke(this, 0);
       }
 
       private void InvokeOnMainThread( Action action )
@@ -114,6 +117,11 @@ namespace MathPuzzleSolverWPF
          {
             CancelAnyComputations();
          };
+         _puzzleSolver.EquationsComputed += delegate (object sender, int equationsComputed)
+         {
+            InvokeOnMainThread(() => NumberEquationComputed?.Invoke(this, equationsComputed));
+         };
+
          _puzzleSolver.Solve();
       }
 

@@ -41,6 +41,8 @@
          <Button Content="Stop"
                  Command="{Binding StopComputingCommand, Mode=OneTime}"
                  Visibility="{Binding ComputationInProgress, Converter={StaticResource BooleanToVisibilityConverter}, Mode=OneWay}"/>
+         <Label Content="Number equations calculated:" />
+         <Label Content="{Binding NumberEquationsCalculated, Mode=OneWay}" />
       </StackPanel>
       <ScrollViewer Grid.Row="1"
                     Grid.ColumnSpan="2">

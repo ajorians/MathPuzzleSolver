@@ -21,6 +21,29 @@ namespace MathPuzzleSolverWPF
          _controller.EndChanged += EndChanged;
          _controller.DigitsChanged += DigitsChanged;
          _controller.ComputationStatusChanged += ComputationStatusChanged;
+         _controller.NumberEquationComputed += NumberEquationsComputed;
+      }
+
+      private int _numberEquationsCalculated = 0;
+      public int NumberEquationsCalculated
+      {
+         get
+         {
+            return _numberEquationsCalculated;
+         }
+         set
+         {
+            if(_numberEquationsCalculated != value )
+            {
+               _numberEquationsCalculated = value;
+               OnPropertyChanged(nameof(NumberEquationsCalculated));
+            }
+         }
+      }
+
+      private void NumberEquationsComputed(object sender, int numberEquationsComputed)
+      {
+         NumberEquationsCalculated = numberEquationsComputed;
       }
 
       private void ComputationStatusChanged(object sender, EventArgs e)
