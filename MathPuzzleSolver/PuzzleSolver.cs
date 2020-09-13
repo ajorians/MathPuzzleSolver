@@ -17,6 +17,7 @@ namespace MathPuzzleSolver
 
       public event CompletedValueHandler CompletedValue;
       public event EventHandler FinishedComputing;
+      public event EventHandler<int> EquationsComputed;
 
       private CancellationTokenSource _CancelSource;
 
@@ -43,12 +44,15 @@ namespace MathPuzzleSolver
          var producer = new EquationCreator( Digits );
          var consumer = new EquationEvaluator();
 
+         int numberEquationComputed = 0;
          foreach ( var equation in producer.GetEquations() )
          {
             int? result = consumer.Evaluate( equation );
 
             if ( result.HasValue )
             {
+               numberEquationComputed++;
+               EquationsComputed?.Invoke(this, numberEquationComputed);
                if ( result >= StartValue && result <= EndValue )
                {
                   CompletedValue?.Invoke( this, new CompletedValueArgs( equation, result.Value ) );
