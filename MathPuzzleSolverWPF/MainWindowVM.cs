@@ -11,14 +11,66 @@ namespace MathPuzzleSolverWPF
 {
    public class MainWindowVM : INotifyPropertyChanged
    {
-      private Controller _controller;
+      private readonly Controller _controller;
       public MainWindowVM( Controller controller)
       {
          _controller = controller;
 
-         _digits = _controller.GetDigitsString();
-         _start = _controller.GetStart();
-         _end = _controller.GetEnd();
+         //_digits = GetDigitsString( _controller.GetDigits() );
+         //_start = _controller.GetStart();
+         //_end = _controller.GetEnd();
+
+         _controller.AnswerItemsChanged += AnswerItemsChanged;
+         _controller.StartChanged += StartChanged;
+         _controller.EndChanged += EndChanged;
+         _controller.DigitsChanged += DigitsChanged;
+      }
+
+      private static string GetDigitsString(int[] digits)
+      {
+         var result = string.Join(", ", digits);
+         return result;
+      }
+
+      private void DigitsChanged(object sender, int[] digits)
+      {
+         Digits = GetDigitsString(digits);
+      }
+
+      private void StartChanged(object sender, int newStart)
+      {
+         Start = newStart;
+      }
+
+      private void EndChanged(object sender, int newEnd)
+      {
+         End = newEnd;
+      }
+
+      private void AnswerItemsChanged(object sender, EventArgs e)
+      {
+         _answers.Clear();
+
+         //for( int i=_controller.GetStart(); i<= _controller.GetEnd(); i++)
+         foreach( var answer in _controller.Answers )
+         {
+            _answers.Add(new AnswerVM(answer));
+         }
+
+         //List<AnswerVM> answersToRemove = new List<AnswerVM>();
+         //foreach( var answer in _answers )
+         //{
+         //   if( answer.Number < _controller.GetStart() || answer.Number > _controller.GetEnd() )
+         //   {
+         //      answersToRemove.Add(answer);
+         //   }
+         //}
+         //answersToRemove.ForEach(ans => _answers.Remove(ans));
+
+         //foreach (var answer in _answers)
+         //{
+
+         //}
       }
 
       private void OnPropertyChanged( string propertyName )

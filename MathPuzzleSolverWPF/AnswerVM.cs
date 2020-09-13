@@ -1,38 +1,36 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MathPuzzleSolverWPF
 {
    public class AnswerVM : INotifyPropertyChanged
    {
-      public AnswerVM(int number)
+      private readonly Answer _answer;
+      public AnswerVM(Answer answer)
       {
-         _number = number;
+         _answer = answer;
+
+         _answer.EquationAdded += EquationAdded;
       }
 
-      private int _number;
+      private void EquationAdded(object sender, string solutionEquation)
+      {
+         Solutions.Add(solutionEquation);
+         if (CurrentSolution == -1)
+         {
+            CurrentSolution = 0;
+         }
+      }
+
       public int Number
       {
          get
          {
-            return _number;
-         }
-         set
-         {
-            if( _number != value )
-            {
-               _number = value;
-               PropertyChanged?.Invoke( this, new PropertyChangedEventArgs( nameof( Number ) ) );
-            }
+            return _answer.Number;
          }
       }
 
-      public ObservableCollection<string> Solutions { get; set; } = new ObservableCollection<string>();
+      public ObservableCollection<string> Solutions { get; } = new ObservableCollection<string>();
 
       private int _currentSolution = -1;
       public int CurrentSolution

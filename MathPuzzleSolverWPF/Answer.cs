@@ -1,48 +1,28 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MathPuzzleSolverWPF
 {
    public class Answer
    {
-      private AnswerVM _answerVM;
-      public List<string> Equations = new List<string>();
+      private List<string> _equations = new List<string>();
+      public ReadOnlyCollection<string> Equations
+      {
+         get => _equations.AsReadOnly();
+      }
       public int Number { get; private set; }
+      public event EventHandler<string> EquationAdded;
 
       public Answer( int number )
       {
          Number = number;
-
-         _answerVM = new AnswerVM( Number )
-         {
-            CurrentSolution = -1,
-            Solutions = new ObservableCollection<string>()
-         };
-      }
-      public AnswerVM GetVM()
-      {
-         return _answerVM;
       }
 
-      public void UpdateVM()
+      public void AddEquation( string equation )
       {
-         var solutions = new ObservableCollection<string>();
-
-         foreach( var equation in Equations)
-         {
-            if ( !_answerVM.Solutions.Contains( equation ) )
-            {
-               _answerVM.Solutions.Add( equation );
-            }
-         }
-         if ( _answerVM.CurrentSolution == -1 )
-         {
-            _answerVM.CurrentSolution = 0;
-         }
+         _equations.Add(equation);
+         EquationAdded?.Invoke(this, equation);
       }
    }
 }

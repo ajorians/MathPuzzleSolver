@@ -12,26 +12,26 @@ namespace MathPuzzleSolverWPF
 {
    public class Controller
    {
-      private int[] _digits = new int[]{ 1, 2, 3, 4};
+      private int[] _digits = new int[]{};
       private int _start = 0;
-      private int _end = 20;
+      private int _end = 0;
 
-      private MainWindowVM _vm;
-      private PuzzleSolver _puzzleSolver;
-      private List<Answer> _answers;
-      private Thread _computeThread;
-      public MainWindowVM VM
+      private List<Answer> _answers = new List<Answer>();
+      public ReadOnlyCollection<Answer> Answers
       {
          get
          {
-            return _vm;
-         }
-         set
-         {
-            _vm = value;
-            RepopulateAnswers();
+            return _answers.AsReadOnly();
          }
       }
+
+      private PuzzleSolver _puzzleSolver;
+      private Thread _computeThread;
+
+      public event EventHandler AnswerItemsChanged;
+      public event EventHandler<int> StartChanged;
+      public event EventHandler<int> EndChanged;
+      public event EventHandler<int[]> DigitsChanged;
 
       public Controller()
       {
@@ -42,15 +42,10 @@ namespace MathPuzzleSolverWPF
          CancelAnyComputations();
       }
 
-      public string GetDigitsString()
-      {
-         var digits = GetDigits();
-         var result = string.Join( ", ", digits );
-         return result;
-      }
       public int[] GetDigits() => _digits;
       public int GetStart() => _start;
       public int GetEnd() => _end;
+
       public void SetDigits( string digits )
       {
          char[] chDigits = digits.Where( ch => char.IsDigit( ch ) ).ToArray();
@@ -62,27 +57,24 @@ namespace MathPuzzleSolverWPF
       {
          _digits = digits;
 
-         VM.Digits = GetDigitsString();
-
          CancelAnyComputations();
+         DigitsChanged?.Invoke(this, GetDigits());
          RepopulateAnswers();
       }
       public void SetStart( int start )
       {
          _start = start;
 
-         VM.Start = GetStart();
-
          CancelAnyComputations();
+         StartChanged?.Invoke(this, GetStart());
          RepopulateAnswers();
       }
       public void SetEnd( int end )
       {
          _end = end;
 
-         VM.End = GetEnd();
-
          CancelAnyComputations();
+         EndChanged?.Invoke(this, GetEnd());
          RepopulateAnswers();
       }
 
@@ -94,11 +86,7 @@ namespace MathPuzzleSolverWPF
             _answers.Add( new Answer( i ) );
          }
 
-         VM.Answers.Clear();
-         foreach( var answer in _answers )
-         {
-            VM.Answers.Add( answer.GetVM() );
-         }
+         AnswerItemsChanged?.Invoke(this, EventArgs.Empty);
       }
 
       private void InvokeOnMainThread( Action action )
@@ -119,11 +107,7 @@ namespace MathPuzzleSolverWPF
             if ( answer is null )
                return;
 
-            InvokeOnMainThread( () =>
-            {
-               answer.Equations.Add( e.Equation );
-               answer.UpdateVM();
-            } );
+            InvokeOnMainThread(() => answer.AddEquation(e.Equation));
          };
          _puzzleSolver.Solve();
       }
