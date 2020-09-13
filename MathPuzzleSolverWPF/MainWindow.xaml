@@ -8,6 +8,9 @@
         Title="MainWindow"
         Height="450"
         Width="800">
+   <Window.Resources>
+      <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+   </Window.Resources>
    <Grid>
       <Grid.RowDefinitions>
          <RowDefinition Height="Auto" />
@@ -22,15 +25,24 @@
                   Grid.ColumnSpan="2">
          <Label Content="Digits:" />
          <TextBox Width="50"
-                  Text="{Binding Digits, Mode=TwoWay}"/>
+                  Text="{Binding Digits, Mode=TwoWay}"
+                  VerticalContentAlignment="Center"/>
          <Label Content="Start:" />
          <TextBox Width="50"
-                  Text="{Binding Start}" />
+                  Text="{Binding Start}"
+                  VerticalContentAlignment="Center"/>
          <Label Content="End:" />
          <TextBox Width="50"
-                  Text="{Binding End}" />
+                  Text="{Binding End}"
+                  VerticalContentAlignment="Center"/>
          <Button Content="Compute"
-                 Command="{Binding ComputeCommand, Mode=OneTime}"/>
+                 Command="{Binding ComputeCommand, Mode=OneTime}"
+                 IsEnabled="{Binding ComputationInProgress, Converter={StaticResource BooleanToVisibilityConverter}, Mode=OneWay}"/>
+         <Button Content="Stop"
+                 Command="{Binding StopComputingCommand, Mode=OneTime}"
+                 Visibility="{Binding ComputationInProgress, Converter={StaticResource BooleanToVisibilityConverter}, Mode=OneWay}"/>
+         <Label Content="Number equations calculated:" />
+         <Label Content="{Binding NumberEquationsCalculated, Mode=OneWay}" />
       </StackPanel>
       <ScrollViewer Grid.Row="1"
                     Grid.ColumnSpan="2">

@@ -16,6 +16,7 @@ namespace MathPuzzleSolver
       public delegate void CompletedValueHandler( object sender, CompletedValueArgs e );
 
       public event CompletedValueHandler CompletedValue;
+      public event EventHandler FinishedComputing;
 
       private CancellationTokenSource _CancelSource;
 
@@ -59,6 +60,8 @@ namespace MathPuzzleSolver
                break;
             }
          }
+
+         FinishedComputing?.BeginInvoke(this, EventArgs.Empty, null, null);
       }
    }
 }

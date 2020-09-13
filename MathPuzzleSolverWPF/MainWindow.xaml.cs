@@ -27,7 +27,11 @@ namespace MathPuzzleSolverWPF
 
          var controller = new Controller();
          var vm = new MainWindowVM( controller );
-         controller.VM = vm;
+
+         controller.SetStart(0);
+         controller.SetEnd(20);
+         controller.SetDigits(new int[] { 1, 2, 3, 4 });
+
          this.DataContext = vm;
 
          this.Closing += delegate ( object sender, CancelEventArgs e )
