@@ -130,7 +130,7 @@ namespace MathPuzzleSolverWPF
 
       public void CancelAnyComputations()
       {
-         if ( !( _computeThread is null ) )
+         if (IsComputationInProgress())
          {
             _puzzleSolver.Cancel();
             _computeThread.Join();
@@ -147,5 +147,12 @@ namespace MathPuzzleSolverWPF
          _computeThread = new Thread( ComputeNumbers );
          _computeThread.Start();
       }
+
+      public void StopComputing()
+      {
+         CancelAnyComputations();
+      }
+
+      public bool IsComputationInProgress() => !(_computeThread is null);
    }
 }

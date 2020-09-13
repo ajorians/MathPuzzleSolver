@@ -21,6 +21,11 @@ namespace MathPuzzleSolverWPF
          _end = _controller.GetEnd();
       }
 
+      private void OnPropertyChanged( string propertyName )
+      {
+         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+      }
+
       private string _digits = "1,2,3,4";
       public string Digits
       {
@@ -33,9 +38,10 @@ namespace MathPuzzleSolverWPF
             if( _digits != value )
             {
                _digits = value;
-               PropertyChanged?.Invoke( this, new PropertyChangedEventArgs( nameof( Digits ) ) );
+               OnPropertyChanged( nameof( Digits ) );
 
                _controller.SetDigits( _digits );
+               OnPropertyChanged(nameof(ComputationInProgress));
             }
          }
       }
@@ -52,9 +58,10 @@ namespace MathPuzzleSolverWPF
             if( value != _start )
             {
                _start = value;
-               PropertyChanged?.Invoke( this, new PropertyChangedEventArgs( nameof( Start ) ) );
+               OnPropertyChanged( nameof( Start ) );
 
                _controller.SetStart( _start );
+               OnPropertyChanged(nameof(ComputationInProgress));
             }
          }
       }
@@ -70,9 +77,10 @@ namespace MathPuzzleSolverWPF
             if ( value != _end )
             {
                _end = value;
-               PropertyChanged?.Invoke( this, new PropertyChangedEventArgs( nameof( End ) ) );
+               OnPropertyChanged( nameof( End ) );
 
                _controller.SetEnd( _end );
+               OnPropertyChanged(nameof(ComputationInProgress));
             }
          }
       }
@@ -84,23 +92,27 @@ namespace MathPuzzleSolverWPF
          {
             return _answers;
          }
-         set
-         {
-            if ( value != _answers )
-            {
-               _answers = value;
-               PropertyChanged?.Invoke( this, new PropertyChangedEventArgs( nameof( Answers ) ) );
-            }
-         }
       }
 
       private void Compute()
       {
          _controller.StartComputing();
+         OnPropertyChanged(nameof(ComputationInProgress));
       }
 
       private ICommand _computeCommand;
       public ICommand ComputeCommand => _computeCommand ?? ( _computeCommand = new RelayCommand( Compute ) );
+
+      private void StopComputing()
+      {
+         _controller.StopComputing();
+         OnPropertyChanged(nameof(ComputationInProgress));
+      }
+
+      private ICommand _stopComputingCommand;
+      public ICommand StopComputingCommand => _stopComputingCommand ?? (_stopComputingCommand = new RelayCommand(StopComputing));
+
+      public bool ComputationInProgress => _controller.IsComputationInProgress();
 
       public event PropertyChangedEventHandler PropertyChanged;
    }
