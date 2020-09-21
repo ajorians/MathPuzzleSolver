@@ -23,7 +23,7 @@ namespace MathPuzzleSolver
          Digits = digits;
       }
 
-      public IEnumerable<string> GetEquations()
+      public IEnumerable<string> GetEquations(int pass)
       {
          int[] currentCombination = { };
          foreach ( var digitCombination in GetDigitCombinations( Digits, currentCombination, new List<int>() ) )
@@ -35,7 +35,7 @@ namespace MathPuzzleSolver
 
                //var temp = ConstructEquations( Operations, items ).ToList();
 
-               foreach ( var equation in ConstructEquations( Operations, items ) )
+               foreach ( var equation in ConstructEquations( Operations, items, pass ) )
                {
                   yield return equation;
                }
@@ -43,50 +43,82 @@ namespace MathPuzzleSolver
          }
       }
 
-      private static IEnumerable<string> ConstructEquations( List<MathOperation> operations, IEnumerable<string> numberGroups )
+      private static IEnumerable<string> ConstructEquations( List<MathOperation> operations, IEnumerable<string> numberGroups, int pass )
       {
-         foreach ( var equation in GetEquation( numberGroups.First(), numberGroups.Skip( 1 ) ) )
+         foreach ( var equation in GetEquation( numberGroups.First(), numberGroups.Skip( 1 ), pass ) )
          {
             yield return equation;
          }
       }
 
-      private static IEnumerable<string> GetEquation( string firstPart, IEnumerable<string> additionalParts )
+      private static IEnumerable<string> GetEquation( string firstPart, IEnumerable<string> additionalParts, int pass )
       {
+         static string PowerEquation( string @base, string exponent ) => $"Power({@base},{exponent})";
+         static string SqrtEquation( string input ) => $"Sqrt({input})";
+         static string FactorialEquation( string input ) => $"Factorial({input})";
+
          int numAdditionalParts = additionalParts.Count();
 
          if ( additionalParts.Any() )
          {
-            foreach ( var equation in GetEquation( additionalParts.First(), additionalParts.Skip( 1 ) ) )
+            foreach ( var equation in GetEquation( additionalParts.First(), additionalParts.Skip( 1 ), pass ) )
             {
                yield return $"{firstPart} + {equation}";
                yield return $"{firstPart} - {equation}";
                yield return $"{firstPart} * {equation}";
                yield return $"{firstPart} / {equation}";
 
-               yield return $"Power({firstPart},{equation})";
+               string current = firstPart;
+               for( int i=0; i<pass; i++ )
+               {
+                  string ret = PowerEquation( current, equation );
+                  current = ret;
+                  if ( pass-1 == i )
+                  {
+                     yield return ret;
+                  }
+               }
             }
 
             for ( int i = 1; i < numAdditionalParts; i++ )
             {
                if ( numAdditionalParts > i )
                {
-                  foreach ( var equation in GetEquation( firstPart, additionalParts.Take( i ) ) )
+                  foreach ( var equation in GetEquation( firstPart, additionalParts.Take( i ), pass ) )
                   {
-                     foreach ( var restOfEquation in GetEquation( equation, additionalParts.Skip( i ) ) )
+                     foreach ( var restOfEquation in GetEquation( equation, additionalParts.Skip( i ), pass ) )
                      {
                         yield return $"{restOfEquation}";
                      }
                   }
                }
             }
-
          }
          else
          {
             yield return firstPart;
-            yield return $"Sqrt({firstPart})";
-            yield return $"Factorial({firstPart})";
+
+            string currentSqrt = firstPart;
+            for ( int i = 0; i < pass; i++ )
+            {
+               string ret = SqrtEquation( currentSqrt );
+               currentSqrt = ret;
+               if ( pass - 1 == i )
+               {
+                  yield return ret;
+               }
+            }
+
+            string currentFactorial = firstPart;
+            for ( int i = 0; i < pass; i++ )
+            {
+               string ret = FactorialEquation( currentFactorial );
+               currentFactorial = ret;
+               if ( pass - 1 == i )
+               {
+                  yield return ret;
+               }
+            }
          }
       }
 
