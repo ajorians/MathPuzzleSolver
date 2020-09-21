@@ -21,6 +21,9 @@ namespace MathPuzzleSolverWPF
 
       public void AddEquation( string equation )
       {
+         if ( _equations.Contains( equation ) )
+            return;
+
          _equations.Add(equation);
          EquationAdded?.Invoke(this, equation);
       }
