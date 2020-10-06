@@ -23,21 +23,24 @@ namespace MathPuzzleSolver
          Digits = digits;
       }
 
-      public IEnumerable<string> GetEquations(int pass)
+      public IEnumerable<string> GetEquations()
       {
-         int[] currentCombination = { };
-         foreach ( var digitCombination in GetDigitCombinations( Digits, currentCombination, new List<int>() ) )
+         for (int pass = 0; pass < 3; pass++)
          {
-            //Let's get all grouping combinations
-            foreach ( var grouping in GetGroupingCombinations( digitCombination.Length ) )
+            int[] currentCombination = { };
+            foreach (var digitCombination in GetDigitCombinations(Digits, currentCombination, new List<int>()))
             {
-               var items = GetDigitsInGroups( digitCombination, grouping );
-
-               //var temp = ConstructEquations( Operations, items ).ToList();
-
-               foreach ( var equation in ConstructEquations( Operations, items, pass ) )
+               //Let's get all grouping combinations
+               foreach (var grouping in GetGroupingCombinations(digitCombination.Length))
                {
-                  yield return equation;
+                  var items = GetDigitsInGroups(digitCombination, grouping);
+
+                  //var temp = ConstructEquations( Operations, items, pass ).ToList();
+
+                  foreach (var equation in ConstructEquations(Operations, items, pass))
+                  {
+                     yield return equation;
+                  }
                }
             }
          }
@@ -101,22 +104,28 @@ namespace MathPuzzleSolver
             string currentSqrt = firstPart;
             for ( int i = 0; i < pass; i++ )
             {
-               string ret = SqrtEquation( currentSqrt );
-               currentSqrt = ret;
                if ( pass - 1 == i )
                {
-                  yield return ret;
+                  yield return SqrtEquation(currentSqrt);
+                  yield return FactorialEquation(currentSqrt);
+               }
+               else
+               {
+                  currentSqrt = SqrtEquation(currentSqrt);
                }
             }
 
             string currentFactorial = firstPart;
-            for ( int i = 0; i < pass; i++ )
+            for (int i = 0; i < pass; i++)
             {
-               string ret = FactorialEquation( currentFactorial );
-               currentFactorial = ret;
-               if ( pass - 1 == i )
+               if (pass - 1 == i)
                {
-                  yield return ret;
+                  yield return SqrtEquation(currentFactorial);
+                  yield return FactorialEquation(currentFactorial);
+               }
+               else
+               {
+                  currentSqrt = FactorialEquation(currentSqrt);
                }
             }
          }

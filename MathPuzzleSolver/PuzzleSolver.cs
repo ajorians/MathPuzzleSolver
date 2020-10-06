@@ -45,26 +45,23 @@ namespace MathPuzzleSolver
          var consumer = new EquationEvaluator();
 
          int numberEquationComputed = 0;
-         for ( int pass = 0; pass < 3; pass++ )
+         foreach ( var equation in producer.GetEquations() )
          {
-            foreach ( var equation in producer.GetEquations( pass ) )
+            int? result = consumer.Evaluate( equation );
+
+            if ( result.HasValue )
             {
-               int? result = consumer.Evaluate( equation );
-
-               if ( result.HasValue )
+               numberEquationComputed++;
+               EquationsComputed?.Invoke( this, numberEquationComputed );
+               if ( result >= StartValue && result <= EndValue )
                {
-                  numberEquationComputed++;
-                  EquationsComputed?.Invoke( this, numberEquationComputed );
-                  if ( result >= StartValue && result <= EndValue )
-                  {
-                     CompletedValue?.Invoke( this, new CompletedValueArgs( equation, result.Value ) );
-                  }
+                  CompletedValue?.Invoke( this, new CompletedValueArgs( equation, result.Value ) );
                }
+            }
 
-               if ( _CancelSource.IsCancellationRequested )
-               {
-                  break;
-               }
+            if ( _CancelSource.IsCancellationRequested )
+            {
+               break;
             }
          }
 
