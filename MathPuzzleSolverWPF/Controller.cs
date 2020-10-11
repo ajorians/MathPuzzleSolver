@@ -34,6 +34,8 @@ namespace MathPuzzleSolverWPF
       public event EventHandler<int[]> DigitsChanged;
       public event EventHandler ComputationStatusChanged;
       public event EventHandler<int> NumberEquationComputed;
+      public event EventHandler<int> PassChanged;
+      public event EventHandler<List<string>> CurrentGroupingEquations;
 
       public Controller()
       {
@@ -121,6 +123,14 @@ namespace MathPuzzleSolverWPF
          {
             InvokeOnMainThread(() => NumberEquationComputed?.Invoke(this, equationsComputed));
          };
+         _puzzleSolver.CurrentPass += delegate (object sender, int pass)
+         {
+            InvokeOnMainThread(() => PassChanged?.Invoke(this, pass));
+         };
+         _puzzleSolver.CurrentGroupCombination += delegate (object sender, List<string> currentGroupCombination)
+          {
+             InvokeOnMainThread(() => CurrentGroupingEquations?.Invoke(this, currentGroupCombination));
+          };
 
          _puzzleSolver.Solve();
       }

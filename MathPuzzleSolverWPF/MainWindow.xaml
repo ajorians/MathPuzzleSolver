@@ -43,6 +43,10 @@
                  Visibility="{Binding ComputationInProgress, Converter={StaticResource BooleanToVisibilityConverter}, Mode=OneWay}"/>
          <Label Content="Number equations calculated:" />
          <Label Content="{Binding NumberEquationsCalculated, Mode=OneWay}" />
+         <Label Content="Pass:" />
+         <Label Content="{Binding Pass, Mode=OneWay}" />
+         <Label Content="Current Grouping:" />
+         <Label Content="{Binding CurrentGroupingList, Mode=OneWay}" />
       </StackPanel>
       <ScrollViewer Grid.Row="1"
                     Grid.ColumnSpan="2">

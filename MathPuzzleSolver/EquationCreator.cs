@@ -7,6 +7,9 @@ namespace MathPuzzleSolver
 {
    public class EquationCreator
    {
+      public event EventHandler<int> CurrentPass;
+      public event EventHandler<List<string>> CurrentGroupCombination;
+
       public int[] Digits { get; private set; }
       public MathOperation Operations { get; set; } =
          MathOperation.Addition |
@@ -27,6 +30,7 @@ namespace MathPuzzleSolver
          int totalEquationsRan = 0;
          for (int pass = 0; pass < 3; pass++)
          {
+            CurrentPass?.Invoke(this, pass);
             foreach (var digitCombination in GetDigitCombinations(Digits))
             {
                //for (MathOperation mathOperation = MathOperation.Addition; mathOperation < MathOperation.All; mathOperation++)
@@ -36,6 +40,11 @@ namespace MathPuzzleSolver
                   {
                      int totalEquationsForGrouping = 0;
                      var items = GetDigitsInGroups(digitCombination, grouping);
+
+                     if (!ProceedWithGroupings(items))
+                        continue;
+
+                     CurrentGroupCombination?.Invoke(this, items);
 
                      //var temp = ConstructEquations( Operations, items, pass ).ToList();
 
@@ -49,6 +58,11 @@ namespace MathPuzzleSolver
                }
             }
          }
+      }
+
+      private bool ProceedWithGroupings(List<string> items)
+      {
+         return !items.Any(str => str.StartsWith("0") && str.Length > 1);
       }
 
       private static IEnumerable<string> ConstructEquations( MathOperation operations, IEnumerable<string> numberGroups, int pass )
@@ -84,6 +98,8 @@ namespace MathPuzzleSolver
 
          static IEnumerable<string> CombinationSqrtAndFactorial(MathOperation mathOperations, string input, int pass)
          {
+            List<string> sqrtAndFactorialCombination = new List<string>();
+
             if (mathOperations.HasFlag(MathOperation.SquareRoot))
             {
                string currentSqrt = input;
@@ -94,12 +110,7 @@ namespace MathPuzzleSolver
                   if (i != pass - 1)
                      continue;
 
-                  yield return currentSqrt;
-
-                  if (mathOperations.HasFlag(MathOperation.Factorial))
-                  {
-                     yield return FactorialEquation(currentSqrt);
-                  }
+                  sqrtAndFactorialCombination.Add(currentSqrt);
                }
             }
 
@@ -113,13 +124,13 @@ namespace MathPuzzleSolver
                   if (i != pass - 1)
                      continue;
 
-                  yield return currentFactorial;
-
-                  if (mathOperations.HasFlag(MathOperation.SquareRoot))
-                  {
-                     yield return SqrtEquation(currentFactorial);
-                  }
+                  sqrtAndFactorialCombination.Add(currentFactorial);
                }
+            }
+
+            foreach( var combination in sqrtAndFactorialCombination)
+            {
+               yield return combination;
             }
          }
 
@@ -157,16 +168,16 @@ namespace MathPuzzleSolver
                         if (mathOperations.HasFlag(MathOperation.Exponent))
                            yield return PowerEquation($"{SmartParens(leftEquation)}", $"{SmartParens(rightEquation)}");
 
-                        foreach (var combo in CombinationSqrtAndFactorial(mathOperations, $"{SmartParens(leftEquation)} + {SmartParens(rightEquation)}", pass))
-                           yield return combo;
-                        foreach (var combo in CombinationSqrtAndFactorial(mathOperations, $"{SmartParens(leftEquation)} - {SmartParens(rightEquation)}", pass))
-                           yield return combo;
-                        foreach (var combo in CombinationSqrtAndFactorial(mathOperations, $"{SmartParens(leftEquation)} * {SmartParens(rightEquation)}", pass))
-                           yield return combo;
-                        foreach (var combo in CombinationSqrtAndFactorial(mathOperations, $"{SmartParens(leftEquation)} / {SmartParens(rightEquation)}", pass))
-                           yield return combo;
-                        foreach (var combo in CombinationSqrtAndFactorial(mathOperations, PowerEquation($"{SmartParens(leftEquation)}", $"{SmartParens(rightEquation)}"), pass))
-                           yield return combo;
+                        //foreach (var combo in CombinationSqrtAndFactorial(mathOperations, $"{SmartParens(leftEquation)} + {SmartParens(rightEquation)}", pass))
+                        //   yield return combo;
+                        //foreach (var combo in CombinationSqrtAndFactorial(mathOperations, $"{SmartParens(leftEquation)} - {SmartParens(rightEquation)}", pass))
+                        //   yield return combo;
+                        //foreach (var combo in CombinationSqrtAndFactorial(mathOperations, $"{SmartParens(leftEquation)} * {SmartParens(rightEquation)}", pass))
+                        //   yield return combo;
+                        //foreach (var combo in CombinationSqrtAndFactorial(mathOperations, $"{SmartParens(leftEquation)} / {SmartParens(rightEquation)}", pass))
+                        //   yield return combo;
+                        //foreach (var combo in CombinationSqrtAndFactorial(mathOperations, PowerEquation($"{SmartParens(leftEquation)}", $"{SmartParens(rightEquation)}"), pass))
+                        //   yield return combo;
                      }
                   }
                }
