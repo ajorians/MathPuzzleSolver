@@ -12,9 +12,12 @@ namespace MathPuzzleSolverWPF
    public class MainWindowVM : INotifyPropertyChanged
    {
       private readonly Controller _controller;
+      private Config _config;
+
       public MainWindowVM( Controller controller)
       {
          _controller = controller;
+         _config = new Config();
 
          _controller.AnswerItemsChanged += AnswerItemsChanged;
          _controller.StartChanged += StartChanged;
@@ -78,7 +81,7 @@ namespace MathPuzzleSolverWPF
 
          foreach( var answer in _controller.Answers )
          {
-            _answers.Add(new AnswerVM(answer));
+            _answers.Add(new AnswerVM(answer, _config));
          }
       }
 

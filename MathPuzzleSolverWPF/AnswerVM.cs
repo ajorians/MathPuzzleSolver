@@ -6,15 +6,20 @@ namespace MathPuzzleSolverWPF
    public class AnswerVM : INotifyPropertyChanged
    {
       private readonly Answer _answer;
-      public AnswerVM(Answer answer)
+      private readonly IConfig _config;
+      public AnswerVM(Answer answer, IConfig config)
       {
          _answer = answer;
+         _config = config;
 
          _answer.EquationAdded += EquationAdded;
       }
 
       private void EquationAdded(object sender, string solutionEquation)
       {
+         if (Solutions.Count > _config.MaxEquationPerSpot)
+            return;
+
          Solutions.Add(solutionEquation);
          if (CurrentSolution == -1)
          {
