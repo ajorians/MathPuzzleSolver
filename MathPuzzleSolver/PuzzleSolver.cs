@@ -51,13 +51,13 @@ namespace MathPuzzleSolver
 
             if ( result.HasValue )
             {
-               numberEquationComputed++;
-               EquationsComputed?.Invoke( this, numberEquationComputed );
                if ( result >= StartValue && result <= EndValue )
                {
                   CompletedValue?.Invoke( this, new CompletedValueArgs( equation, result.Value ) );
                }
             }
+            numberEquationComputed++;
+            EquationsComputed?.Invoke(this, numberEquationComputed);
 
             if ( _CancelSource.IsCancellationRequested )
             {
