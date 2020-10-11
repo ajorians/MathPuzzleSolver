@@ -1,22 +1,24 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 namespace MathPuzzleSolver
 {
    public class EquationCreator
    {
+      public event EventHandler<int> CurrentPass;
+      public event EventHandler<List<string>> CurrentGroupCombination;
+
       public int[] Digits { get; private set; }
-      public List<MathOperation> Operations { get; set; } = new List<MathOperation>()
-      {
-         MathOperation.Addition,
-         MathOperation.Subtraction,
-         MathOperation.Multiplication,
-         MathOperation.Division,
-         MathOperation.Exponent,
-         MathOperation.Factorial,
-         MathOperation.SquareRoot
-      };
+      public MathOperation Operations { get; set; } =
+         MathOperation.Addition |
+         MathOperation.Subtraction |
+         MathOperation.Multiplication |
+         MathOperation.Division |
+         MathOperation.Exponent |
+         MathOperation.Factorial |
+         MathOperation.SquareRoot;
 
       public EquationCreator( int[] digits )
       {
@@ -25,68 +27,161 @@ namespace MathPuzzleSolver
 
       public IEnumerable<string> GetEquations()
       {
-         int[] currentCombination = { };
-         foreach ( var digitCombination in GetDigitCombinations( Digits, currentCombination, new List<int>() ) )
+         int totalEquationsRan = 0;
+         for (int pass = 0; pass < 3; pass++)
          {
-            //Let's get all grouping combinations
-            foreach ( var grouping in GetGroupingCombinations( digitCombination.Length ) )
+            CurrentPass?.Invoke(this, pass);
+            foreach (var digitCombination in GetDigitCombinations(Digits))
             {
-               var items = GetDigitsInGroups( digitCombination, grouping );
-
-               //var temp = ConstructEquations( Operations, items ).ToList();
-
-               foreach ( var equation in ConstructEquations( Operations, items ) )
+               //for (MathOperation mathOperation = MathOperation.Addition; mathOperation < MathOperation.All; mathOperation++)
                {
-                  yield return equation;
+                  //Let's get all grouping combinations
+                  foreach (var grouping in GetGroupingCombinations(digitCombination.Length))
+                  {
+                     int totalEquationsForGrouping = 0;
+                     var items = GetDigitsInGroups(digitCombination, grouping);
+
+                     if (!ProceedWithGroupings(items))
+                        continue;
+
+                     CurrentGroupCombination?.Invoke(this, items);
+
+                     //var temp = ConstructEquations( Operations, items, pass ).ToList();
+
+                     foreach (var equation in ConstructEquations(Operations, items, pass))
+                     {
+                        totalEquationsForGrouping++;
+                        totalEquationsRan++;
+                        yield return equation;
+                     }
+                  }
                }
             }
          }
       }
 
-      private static IEnumerable<string> ConstructEquations( List<MathOperation> operations, IEnumerable<string> numberGroups )
+      private bool ProceedWithGroupings(List<string> items)
       {
-         foreach ( var equation in GetEquation( numberGroups.First(), numberGroups.Skip( 1 ) ) )
+         return !items.Any(str => str.StartsWith("0") && str.Length > 1);
+      }
+
+      private static IEnumerable<string> ConstructEquations( MathOperation operations, IEnumerable<string> numberGroups, int pass )
+      {
+         foreach ( var equation in GetEquation(operations, numberGroups, pass ) )
          {
             yield return equation;
          }
       }
 
-      private static IEnumerable<string> GetEquation( string firstPart, IEnumerable<string> additionalParts )
+      private static string SmartParens( string equation )
       {
-         int numAdditionalParts = additionalParts.Count();
+         if (equation.All(ch => char.IsDigit(ch)))
+            return equation;
 
-         if ( additionalParts.Any() )
+         if (equation.StartsWith("Power(") && equation.EndsWith(")"))
+            return equation;
+
+         if (equation.StartsWith("Sqrt(") && equation.EndsWith(")"))
+            return equation;
+
+         if (equation.StartsWith("Factorial(") && equation.EndsWith(")"))
+            return equation;
+
+         return $"({equation})";
+      }
+
+      private static IEnumerable<string> GetEquation( MathOperation mathOperations, IEnumerable<string> parts, int pass )
+      {
+         static string PowerEquation( string @base, string exponent ) => $"Power({@base},{exponent})";
+         static string SqrtEquation( string input ) => $"Sqrt({input})";
+         static string FactorialEquation( string input ) => $"Factorial({input})";
+
+         static IEnumerable<string> CombinationSqrtAndFactorial(MathOperation mathOperations, string input, int pass)
          {
-            foreach ( var equation in GetEquation( additionalParts.First(), additionalParts.Skip( 1 ) ) )
-            {
-               yield return $"{firstPart} + {equation}";
-               yield return $"{firstPart} - {equation}";
-               yield return $"{firstPart} * {equation}";
-               yield return $"{firstPart} / {equation}";
+            List<string> sqrtAndFactorialCombination = new List<string>();
 
-               yield return $"Power({firstPart},{equation})";
+            if (mathOperations.HasFlag(MathOperation.SquareRoot))
+            {
+               string currentSqrt = input;
+               for (int i = 0; i < pass; i++)
+               {
+                  currentSqrt = SqrtEquation(currentSqrt);
+
+                  if (i != pass - 1)
+                     continue;
+
+                  sqrtAndFactorialCombination.Add(currentSqrt);
+               }
             }
 
-            for ( int i = 1; i < numAdditionalParts; i++ )
+            if (mathOperations.HasFlag(MathOperation.Factorial))
             {
-               if ( numAdditionalParts > i )
+               string currentFactorial = input;
+               for (int i = 0; i < pass; i++)
                {
-                  foreach ( var equation in GetEquation( firstPart, additionalParts.Take( i ) ) )
+                  currentFactorial = FactorialEquation(currentFactorial);
+
+                  if (i != pass - 1)
+                     continue;
+
+                  sqrtAndFactorialCombination.Add(currentFactorial);
+               }
+            }
+
+            foreach( var combination in sqrtAndFactorialCombination)
+            {
+               yield return combination;
+            }
+         }
+
+         int numParts = parts.Count();
+         for (int takeParts = 1; takeParts <= numParts; takeParts++)
+         {
+            IEnumerable<string> takenParts = parts.Take(takeParts);
+            IEnumerable<string> takenAdditionalParts = parts.Skip(takeParts);
+
+            if (takenParts.Any())
+            {
+               if (takenParts.Count() == 1 && !takenAdditionalParts.Any())
+               {
+                  yield return takenParts.Single();
+
+                  foreach (var combo in CombinationSqrtAndFactorial(mathOperations, takenParts.Single(), pass) )
+                     yield return combo;
+               }
+
+               if (takenAdditionalParts.Any())
+               {
+                  foreach (var leftEquation in GetEquation(mathOperations, takenParts, pass))
                   {
-                     foreach ( var restOfEquation in GetEquation( equation, additionalParts.Skip( i ) ) )
+                     foreach (var rightEquation in GetEquation(mathOperations, takenAdditionalParts, pass))
                      {
-                        yield return $"{restOfEquation}";
+                        if( mathOperations.HasFlag( MathOperation.Addition ))
+                           yield return $"{SmartParens(leftEquation)} + {SmartParens(rightEquation)}";
+                        if (mathOperations.HasFlag(MathOperation.Subtraction))
+                           yield return $"{SmartParens(leftEquation)} - {SmartParens(rightEquation)}";
+                        if (mathOperations.HasFlag(MathOperation.Multiplication))
+                           yield return $"{SmartParens(leftEquation)} * {SmartParens(rightEquation)}";
+                        if (mathOperations.HasFlag(MathOperation.Division))
+                           yield return $"{SmartParens(leftEquation)} / {SmartParens(rightEquation)}";
+
+                        if (mathOperations.HasFlag(MathOperation.Exponent))
+                           yield return PowerEquation($"{SmartParens(leftEquation)}", $"{SmartParens(rightEquation)}");
+
+                        //foreach (var combo in CombinationSqrtAndFactorial(mathOperations, $"{SmartParens(leftEquation)} + {SmartParens(rightEquation)}", pass))
+                        //   yield return combo;
+                        //foreach (var combo in CombinationSqrtAndFactorial(mathOperations, $"{SmartParens(leftEquation)} - {SmartParens(rightEquation)}", pass))
+                        //   yield return combo;
+                        //foreach (var combo in CombinationSqrtAndFactorial(mathOperations, $"{SmartParens(leftEquation)} * {SmartParens(rightEquation)}", pass))
+                        //   yield return combo;
+                        //foreach (var combo in CombinationSqrtAndFactorial(mathOperations, $"{SmartParens(leftEquation)} / {SmartParens(rightEquation)}", pass))
+                        //   yield return combo;
+                        //foreach (var combo in CombinationSqrtAndFactorial(mathOperations, PowerEquation($"{SmartParens(leftEquation)}", $"{SmartParens(rightEquation)}"), pass))
+                        //   yield return combo;
                      }
                   }
                }
             }
-
-         }
-         else
-         {
-            yield return firstPart;
-            yield return $"Sqrt({firstPart})";
-            yield return $"Factorial({firstPart})";
          }
       }
 
@@ -131,27 +226,69 @@ namespace MathPuzzleSolver
          return firstValues;
       }
 
-      private IEnumerable<int[]> GetDigitCombinations( int[] digits, int[] currentCombination, List<int> list )
+      // Generating permutation using Heap Algorithm
+      private static IEnumerable<int[]> heapPermutation(int[] a, int size, int n)
       {
-         if ( currentCombination.Length == digits.Length )
+         // if size becomes 1 then prints the obtained
+         // permutation
+         if (size == 1)
+            yield return a;
+
+         for (int i = 0; i < size; i++)
          {
-            yield return currentCombination;
-         }
+            foreach (var permutation in heapPermutation(a, size - 1, n))
+               yield return permutation;
 
-         for ( int i = 0; i < digits.Length; i++ )
-         {
-            if ( list.Contains( i ) )
-               continue;
-
-            int[] combo = currentCombination.Concat( new int[] { digits[i] } ).ToArray();
-
-            foreach ( var item in GetDigitCombinations( digits, combo, new List<int>( list ) { i } ) )
+            // if size is odd, swap 0th i.e (first) and
+            // (size-1)th i.e (last) element
+            if (size % 2 == 1)
             {
-               yield return item;
+               int temp = a[0];
+               a[0] = a[size - 1];
+               a[size - 1] = temp;
+            }
+
+            // If size is even, swap ith and
+            // (size-1)th i.e (last) element
+            else
+            {
+               int temp = a[i];
+               a[i] = a[size - 1];
+               a[size - 1] = temp;
             }
          }
+      }
 
-         yield break;
+      class DigitEqualityComparer : IEqualityComparer<int[]>
+      {
+         public bool Equals(int[] x, int[] y)
+         {
+            Debug.Assert(x.GetLength(0) == y.GetLength(0));
+
+            return GetHashCode(x) == GetHashCode(y);
+         }
+
+         public int GetHashCode(int[] arr)
+         {
+            int result = 0;
+            int length = arr.GetLength(0);
+            for (int digit = length - 1; digit >= 0; digit--)
+            {
+               int significance = (int)Math.Pow(10, length - (digit + 1));
+               result += arr[digit] * significance;
+            }
+            return result;
+         }
+      }
+
+      private IEnumerable<int[]> GetDigitCombinations( int[] digits )
+      {
+         var comparer = new DigitEqualityComparer();
+
+         foreach (var uniquePermutation in heapPermutation(digits, digits.Length, digits.Length).Distinct(comparer) )
+         {
+            yield return uniquePermutation;
+         }
       }
    }
 }

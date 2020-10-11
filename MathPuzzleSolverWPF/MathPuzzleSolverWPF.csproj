@@ -59,6 +59,8 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Answer.cs" />
+    <Compile Include="Config.cs" />
+    <Compile Include="IConfig.cs" />
     <Compile Include="RelayCommand.cs" />
     <Page Include="AnswerUserControl.xaml">
       <SubType>Designer</SubType>

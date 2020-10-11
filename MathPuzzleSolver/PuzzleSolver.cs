@@ -18,6 +18,8 @@ namespace MathPuzzleSolver
       public event CompletedValueHandler CompletedValue;
       public event EventHandler FinishedComputing;
       public event EventHandler<int> EquationsComputed;
+      public event EventHandler<List<string>> CurrentGroupCombination;
+      public event EventHandler<int> CurrentPass;
 
       private CancellationTokenSource _CancelSource;
 
@@ -42,6 +44,8 @@ namespace MathPuzzleSolver
       public void Solve()
       {
          var producer = new EquationCreator( Digits );
+         producer.CurrentPass += Producer_CurrentPass;
+         producer.CurrentGroupCombination += Producer_CurrentGroupCombination;
          var consumer = new EquationEvaluator();
 
          int numberEquationComputed = 0;
@@ -51,13 +55,13 @@ namespace MathPuzzleSolver
 
             if ( result.HasValue )
             {
-               numberEquationComputed++;
-               EquationsComputed?.Invoke(this, numberEquationComputed);
                if ( result >= StartValue && result <= EndValue )
                {
                   CompletedValue?.Invoke( this, new CompletedValueArgs( equation, result.Value ) );
                }
             }
+            numberEquationComputed++;
+            EquationsComputed?.Invoke(this, numberEquationComputed);
 
             if ( _CancelSource.IsCancellationRequested )
             {
@@ -66,6 +70,16 @@ namespace MathPuzzleSolver
          }
 
          FinishedComputing?.BeginInvoke(this, EventArgs.Empty, null, null);
+      }
+
+      private void Producer_CurrentPass(object sender, int e)
+      {
+         CurrentPass?.Invoke(this, e);
+      }
+
+      private void Producer_CurrentGroupCombination(object sender, List<string> e)
+      {
+         CurrentGroupCombination?.Invoke(this, e);
       }
    }
 }

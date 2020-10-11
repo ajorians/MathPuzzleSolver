@@ -12,9 +12,12 @@ namespace MathPuzzleSolverWPF
    public class MainWindowVM : INotifyPropertyChanged
    {
       private readonly Controller _controller;
+      private Config _config;
+
       public MainWindowVM( Controller controller)
       {
          _controller = controller;
+         _config = new Config();
 
          _controller.AnswerItemsChanged += AnswerItemsChanged;
          _controller.StartChanged += StartChanged;
@@ -22,6 +25,58 @@ namespace MathPuzzleSolverWPF
          _controller.DigitsChanged += DigitsChanged;
          _controller.ComputationStatusChanged += ComputationStatusChanged;
          _controller.NumberEquationComputed += NumberEquationsComputed;
+         _controller.PassChanged += PassChanged;
+         _controller.CurrentGroupingEquations += CurrentGroupingEquations;
+      }
+
+      private List<string> _curentGrouping = new List<string>();
+      public List<string> CurrentGrouping
+      {
+         get
+         {
+            return _curentGrouping;
+         }
+         set
+         {
+            if (_curentGrouping != value)
+            {
+               _curentGrouping = value;
+               OnPropertyChanged(nameof(CurrentGrouping));
+               OnPropertyChanged(nameof(CurrentGroupingList));
+            }
+         }
+      }
+      public string CurrentGroupingList
+      {
+         get
+         {
+            return string.Join(", ", CurrentGrouping);
+         }
+      }
+      private void CurrentGroupingEquations(object sender, List<string> currentGrouping)
+      {
+         CurrentGrouping = currentGrouping;
+      }
+
+      private int _pass = 0;
+      public int Pass
+      {
+         get
+         {
+            return _pass;
+         }
+         set
+         {
+            if (_pass != value)
+            {
+               _pass = value;
+               OnPropertyChanged(nameof(Pass));
+            }
+         }
+      }
+      private void PassChanged(object sender, int pass)
+      {
+         Pass = pass;
       }
 
       private int _numberEquationsCalculated = 0;
@@ -78,7 +133,7 @@ namespace MathPuzzleSolverWPF
 
          foreach( var answer in _controller.Answers )
          {
-            _answers.Add(new AnswerVM(answer));
+            _answers.Add(new AnswerVM(answer, _config));
          }
       }
 
