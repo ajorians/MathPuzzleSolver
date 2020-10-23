@@ -69,7 +69,7 @@ namespace MathPuzzleSolver
             }
          }
 
-         FinishedComputing?.BeginInvoke(this, EventArgs.Empty, null, null);
+         FinishedComputing?.Invoke( this, EventArgs.Empty );
       }
 
       private void Producer_CurrentPass(object sender, int e)

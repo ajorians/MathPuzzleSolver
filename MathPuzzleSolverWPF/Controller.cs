@@ -95,9 +95,10 @@ namespace MathPuzzleSolverWPF
          NumberEquationComputed?.Invoke(this, 0);
       }
 
-      private void InvokeOnMainThread( Action action )
+      private async void InvokeOnMainThread( Action action )
       {
-         Application.Current?.Dispatcher.BeginInvoke( action );
+         var task = Task.Run( () => Application.Current?.Dispatcher.BeginInvoke( action ) );
+         await task;
       }
 
       private void ComputeNumbers()
@@ -135,14 +136,25 @@ namespace MathPuzzleSolverWPF
          _puzzleSolver.Solve();
       }
 
+      private object _cancelLock = new object();
+      private bool _cancelInProgress = false;
+
       public void CancelAnyComputations()
       {
-         if (IsComputationInProgress())
+         if ( _cancelInProgress )
+            return;
+
+         lock ( _cancelLock )
          {
-            _puzzleSolver.Cancel();
-            _computeThread.Join();
-            _computeThread = null;
-            ComputationStatusChanged?.Invoke(this, EventArgs.Empty);
+            _cancelInProgress = true;
+            if ( IsComputationInProgress() )
+            {
+               _puzzleSolver.Cancel();
+               _computeThread.Join();
+               _computeThread = null;
+               ComputationStatusChanged?.Invoke( this, EventArgs.Empty );
+            }
+            _cancelInProgress = false;
          }
       }
 
