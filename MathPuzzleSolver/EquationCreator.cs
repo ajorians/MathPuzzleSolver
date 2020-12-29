@@ -1,14 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
 namespace MathPuzzleSolver
 {
    public class EquationCreator
    {
-      public event EventHandler<int> CurrentPass;
-      public event EventHandler<List<string>> CurrentGroupCombination;
+      public event EventHandler<int>? CurrentPass;
+      public event EventHandler<List<string>>? CurrentGroupCombination;
 
       public int[] Digits { get; private set; }
       public MathOperation Operations { get; set; } =
@@ -261,8 +262,18 @@ namespace MathPuzzleSolver
 
       class DigitEqualityComparer : IEqualityComparer<int[]>
       {
-         public bool Equals(int[] x, int[] y)
+         public static int Mike( [NotNull] object obj )
          {
+            return 0;
+         }
+
+         public bool Equals( [AllowNull] int[] x, [AllowNull] int[] y)
+         {
+            Mike( new List<int>() );
+
+            if ( x is null || y is null )
+               return false;
+
             Debug.Assert(x.GetLength(0) == y.GetLength(0));
 
             return GetHashCode(x) == GetHashCode(y);

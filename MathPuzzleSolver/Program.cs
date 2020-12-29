@@ -23,7 +23,7 @@ namespace MathPuzzleSolver
 
          var puzzleSolver = new PuzzleSolver( new int[] { 1, 2, 3, 4 } );
 
-         puzzleSolver.CompletedValue += delegate(object sender, CompletedValueArgs e)
+         puzzleSolver.CompletedValue += delegate(object? sender, CompletedValueArgs e)
          {
             if ( !mapResultToEquation.ContainsKey( e.Value ) )
             {

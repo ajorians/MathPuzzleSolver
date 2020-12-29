@@ -1,4 +1,6 @@
-﻿using System;
+﻿
+
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -8,18 +10,21 @@ namespace MathPuzzleSolver
 {
    public class PuzzleSolver
    {
+#nullable disable
       public int StartValue { get; set; } = 0;
       public int EndValue { get; set; } = 20;
 
+#nullable restore
+
       public int[] Digits { get; private set; }
 
-      public delegate void CompletedValueHandler( object sender, CompletedValueArgs e );
+      public delegate void CompletedValueHandler( object? sender, CompletedValueArgs e );
 
-      public event CompletedValueHandler CompletedValue;
-      public event EventHandler FinishedComputing;
-      public event EventHandler<int> EquationsComputed;
-      public event EventHandler<List<string>> CurrentGroupCombination;
-      public event EventHandler<int> CurrentPass;
+      public event CompletedValueHandler? CompletedValue;
+      public event EventHandler? FinishedComputing;
+      public event EventHandler<int>? EquationsComputed;
+      public event EventHandler<List<string>>? CurrentGroupCombination;
+      public event EventHandler<int>? CurrentPass;
 
       private CancellationTokenSource _CancelSource;
 
@@ -33,7 +38,6 @@ namespace MathPuzzleSolver
       ~PuzzleSolver()
       {
          _CancelSource.Dispose();
-         _CancelSource = null;
       }
 
       public void Cancel()
@@ -72,12 +76,12 @@ namespace MathPuzzleSolver
          FinishedComputing?.Invoke( this, EventArgs.Empty );
       }
 
-      private void Producer_CurrentPass(object sender, int e)
+      private void Producer_CurrentPass(object? sender, int e)
       {
          CurrentPass?.Invoke(this, e);
       }
 
-      private void Producer_CurrentGroupCombination(object sender, List<string> e)
+      private void Producer_CurrentGroupCombination(object? sender, List<string> e)
       {
          CurrentGroupCombination?.Invoke(this, e);
       }

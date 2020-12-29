@@ -27,6 +27,8 @@ namespace MathPuzzleSolverWPF
          _controller.NumberEquationComputed += NumberEquationsComputed;
          _controller.PassChanged += PassChanged;
          _controller.CurrentGroupingEquations += CurrentGroupingEquations;
+
+         _stopComputingCommand = new RelayCommand( StopComputing );
       }
 
       private List<string> _curentGrouping = new List<string>();
@@ -53,7 +55,7 @@ namespace MathPuzzleSolverWPF
             return string.Join(", ", CurrentGrouping);
          }
       }
-      private void CurrentGroupingEquations(object sender, List<string> currentGrouping)
+      private void CurrentGroupingEquations(object? sender, List<string> currentGrouping)
       {
          CurrentGrouping = currentGrouping;
       }
@@ -74,7 +76,7 @@ namespace MathPuzzleSolverWPF
             }
          }
       }
-      private void PassChanged(object sender, int pass)
+      private void PassChanged(object? sender, int pass)
       {
          Pass = pass;
       }
@@ -96,12 +98,12 @@ namespace MathPuzzleSolverWPF
          }
       }
 
-      private void NumberEquationsComputed(object sender, int numberEquationsComputed)
+      private void NumberEquationsComputed(object? sender, int numberEquationsComputed)
       {
          NumberEquationsCalculated = numberEquationsComputed;
       }
 
-      private void ComputationStatusChanged(object sender, EventArgs e)
+      private void ComputationStatusChanged(object? sender, EventArgs e)
       {
          OnPropertyChanged(nameof(ComputationInProgress));
       }
@@ -112,22 +114,22 @@ namespace MathPuzzleSolverWPF
          return result;
       }
 
-      private void DigitsChanged(object sender, int[] digits)
+      private void DigitsChanged(object? sender, int[] digits)
       {
          Digits = GetDigitsString(digits);
       }
 
-      private void StartChanged(object sender, int newStart)
+      private void StartChanged(object? sender, int newStart)
       {
          Start = newStart;
       }
 
-      private void EndChanged(object sender, int newEnd)
+      private void EndChanged(object? sender, int newEnd)
       {
          End = newEnd;
       }
 
-      private void AnswerItemsChanged(object sender, EventArgs e)
+      private void AnswerItemsChanged(object? sender, EventArgs e)
       {
          _answers.Clear();
 
@@ -209,10 +211,17 @@ namespace MathPuzzleSolverWPF
 
       private void Compute()
       {
-         _controller.StartComputing();
+         try
+         {
+            _controller?.StartComputing();
+         }
+         catch (Exception ex)
+         {
+
+         }
       }
 
-      private ICommand _computeCommand;
+      private ICommand? _computeCommand;
       public ICommand ComputeCommand => _computeCommand ?? ( _computeCommand = new RelayCommand( Compute ) );
 
       private void StopComputing()
@@ -221,10 +230,10 @@ namespace MathPuzzleSolverWPF
       }
 
       private ICommand _stopComputingCommand;
-      public ICommand StopComputingCommand => _stopComputingCommand ?? (_stopComputingCommand = new RelayCommand(StopComputing));
+      public ICommand StopComputingCommand => _stopComputingCommand;
 
       public bool ComputationInProgress => _controller.IsComputationInProgress();
 
-      public event PropertyChangedEventHandler PropertyChanged;
+      public event PropertyChangedEventHandler? PropertyChanged;
    }
 }

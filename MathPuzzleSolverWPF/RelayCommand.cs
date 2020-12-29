@@ -24,7 +24,7 @@ namespace MathPuzzleSolverWPF
       /// </summary>
       /// <param name="execute">The execution logic.</param>
       public RelayCommand( Action execute )
-         : this( execute, null )
+         : this( execute, () => true )
       {
       }
 

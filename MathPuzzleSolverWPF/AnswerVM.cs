@@ -15,7 +15,7 @@ namespace MathPuzzleSolverWPF
          _answer.EquationAdded += EquationAdded;
       }
 
-      private void EquationAdded(object sender, string solutionEquation)
+      private void EquationAdded(object? sender, string solutionEquation)
       {
          if (Solutions.Count > _config.MaxEquationPerSpot)
             return;
@@ -54,6 +54,6 @@ namespace MathPuzzleSolverWPF
          }
       }
 
-      public event PropertyChangedEventHandler PropertyChanged;
+      public event PropertyChangedEventHandler? PropertyChanged;
    }
 }

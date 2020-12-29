@@ -12,7 +12,7 @@ namespace MathPuzzleSolverWPF
          get => _equations.AsReadOnly();
       }
       public int Number { get; private set; }
-      public event EventHandler<string> EquationAdded;
+      public event EventHandler<string>? EquationAdded;
 
       public Answer( int number )
       {

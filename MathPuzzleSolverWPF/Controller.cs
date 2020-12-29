@@ -25,17 +25,17 @@ namespace MathPuzzleSolverWPF
          }
       }
 
-      private PuzzleSolver _puzzleSolver;
-      private Thread _computeThread;
+      private PuzzleSolver? _puzzleSolver;
+      private Thread? _computeThread;
 
-      public event EventHandler AnswerItemsChanged;
-      public event EventHandler<int> StartChanged;
-      public event EventHandler<int> EndChanged;
-      public event EventHandler<int[]> DigitsChanged;
-      public event EventHandler ComputationStatusChanged;
-      public event EventHandler<int> NumberEquationComputed;
-      public event EventHandler<int> PassChanged;
-      public event EventHandler<List<string>> CurrentGroupingEquations;
+      public event EventHandler? AnswerItemsChanged;
+      public event EventHandler<int>? StartChanged;
+      public event EventHandler<int>? EndChanged;
+      public event EventHandler<int[]>? DigitsChanged;
+      public event EventHandler? ComputationStatusChanged;
+      public event EventHandler<int>? NumberEquationComputed;
+      public event EventHandler<int>? PassChanged;
+      public event EventHandler<List<string>>? CurrentGroupingEquations;
 
       public Controller()
       {
@@ -108,7 +108,7 @@ namespace MathPuzzleSolverWPF
             StartValue = GetStart(),
             EndValue = GetEnd()
          };
-         _puzzleSolver.CompletedValue += delegate ( object sender, CompletedValueArgs e )
+         _puzzleSolver.CompletedValue += delegate ( object? sender, CompletedValueArgs e )
          {
             var answer = _answers.FirstOrDefault( an => an.Number == e.Value );
             if ( answer is null )
@@ -116,19 +116,19 @@ namespace MathPuzzleSolverWPF
 
             InvokeOnMainThread(() => answer.AddEquation(e.Equation));
          };
-         _puzzleSolver.FinishedComputing += delegate (object sender, EventArgs e)
+         _puzzleSolver.FinishedComputing += delegate (object? sender, EventArgs e)
          {
             CancelAnyComputations();
          };
-         _puzzleSolver.EquationsComputed += delegate (object sender, int equationsComputed)
+         _puzzleSolver.EquationsComputed += delegate (object? sender, int equationsComputed)
          {
             InvokeOnMainThread(() => NumberEquationComputed?.Invoke(this, equationsComputed));
          };
-         _puzzleSolver.CurrentPass += delegate (object sender, int pass)
+         _puzzleSolver.CurrentPass += delegate (object? sender, int pass)
          {
             InvokeOnMainThread(() => PassChanged?.Invoke(this, pass));
          };
-         _puzzleSolver.CurrentGroupCombination += delegate (object sender, List<string> currentGroupCombination)
+         _puzzleSolver.CurrentGroupCombination += delegate (object? sender, List<string> currentGroupCombination)
           {
              InvokeOnMainThread(() => CurrentGroupingEquations?.Invoke(this, currentGroupCombination));
           };
@@ -149,8 +149,8 @@ namespace MathPuzzleSolverWPF
             _cancelInProgress = true;
             if ( IsComputationInProgress() )
             {
-               _puzzleSolver.Cancel();
-               _computeThread.Join();
+               _puzzleSolver?.Cancel();
+               _computeThread?.Join();
                _computeThread = null;
                ComputationStatusChanged?.Invoke( this, EventArgs.Empty );
             }
